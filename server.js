@@ -6,10 +6,7 @@ import sfs from "session-file-store";
 const app = express();
 const FileStore = sfs(session);
 const store = new FileStore({ path: "./sesiones", ttl: 300, retries:0 })
-// const store = MongoStore.create({
-//   mongoUrl:"mongodb+srv://juampi:tigrerex@cluster0.cqvytwa.mongodb.net/test",
-//   ttl:300
-// })
+
 
 app.set("views", "./views");
 app.set("view engine", "pug");
@@ -18,7 +15,6 @@ app.use(express.urlencoded({extended:true}))
 app.use(cookieParser());
 app.use(express.static("./views"));
 app.use(express.static("./styles"));
-app.use(express.static("./src"));
 
 
 app.get("/", (req,res) => {
@@ -57,18 +53,6 @@ app.get("/logout", (req,res) => {
       }
   })
 })
-
-
-// COOKIES
-app.get("/set", (req,res) => {
-  res.cookie("regular", "cookie")
-  res.send("Cookie seteada")
-})
-
-app.get("/setEX", (req,res) => {
-  res.cookie("server2", "express", {maxAge:30000}).send("Cookie setEX")
-})
-
 
 
 // PUERTO
