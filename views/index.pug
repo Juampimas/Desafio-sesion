@@ -1,0 +1,14 @@
+html 
+    head 
+        title Inicio de sesión
+        link(rel="stylesheet", href="style.css")
+    body 
+        -function nombreNuevo(nombre){if(nombre==undefined){return ""}else {return nombre}} 
+        div.banner
+            h1(id="titulo")= `Bienvenido `+ nombreNuevo(nombre)
+            div
+                a(href="/login") Log In 
+                a(href="/logout") Log Out
+
+    
+        

@@ -1,0 +1,12 @@
+html 
+    head 
+        title Inicio de sesión
+        link(rel="stylesheet", href="login.css")
+    body 
+        div.formulario
+            form(action="/login", method="post") 
+                a(href="/") Volver al inicio 
+                h2 Iniciar sesión
+                input(type="text" placeholder="Nombre" id="nombre" name="nombre")
+                input(type="password" placeholder="Contraseña" id="contraseña")
+                input(type="submit", value="Log In" id="login")
