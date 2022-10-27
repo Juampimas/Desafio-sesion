@@ -1,8 +1,12 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import session from "express-session";
+// import session from "./middlewares/session.js";
+import passport from "passport";
 import sfs from "session-file-store";
+import session from "express-session";
+import PassportLocal from "passport-local"
 
+let LocalStrategy = PassportLocal.Strategy;
 const app = express();
 const FileStore = sfs(session);
 const store = new FileStore({ path: "./sesiones", ttl: 300, retries:0 })
@@ -11,13 +15,45 @@ const store = new FileStore({ path: "./sesiones", ttl: 300, retries:0 })
 app.set("views", "./views");
 app.set("view engine", "pug");
 
+app.use(cookieParser("mi secreto"));
+app.use(session({
+      secret:"mi secreto",
+      resave: true,
+      saveUninitialized:true
+  }));
+
 app.use(express.urlencoded({extended:true}))
-app.use(cookieParser());
 app.use(express.static("./views"));
 app.use(express.static("./styles"));
 
+// PASSPORT
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.get("/", (req,res) => {
+passport.use(new LocalStrategy(function(username,password,done){
+  if (username === "Juan Pablo" && password === "123456"){
+    return done(null, {id:1, nombre:username})
+  } else{
+    done(null, false)
+  }
+}))
+
+passport.serializeUser(function(user,done){
+  done(null,user.id)
+});
+
+passport.deserializeUser(function(id,done){
+  done(null,{id:1, nombre:"juan"})
+});
+
+
+app.get("/",(req,res,next)=>{
+  if (req.isAuthenticated()){
+    return next()
+  } else {
+    res.redirect("/login")
+  }
+}, (req,res) => {
     res.render("index")
 })
 
@@ -27,32 +63,27 @@ app.get("/login", (req,res) => {
 
 
 // SESSION
-app.use(session({
-    store,
-    secret: "123456", 
-    resave:false,
-    saveUninitialized: false,
-    ttl:300,
-    maxAge:300
-}))
-app.post("/login", (req,res) => {
-  const nombre = req.body.nombre;
-  req.session.user = nombre;
-  req.session.admin = true;
-  console.log(req.session);
-  res.render("index", {nombre :nombre})
-})
-
+// app.post("/login", (req,res) => {
+//   const nombre = req.body.nombre;
+//   req.session.user = nombre;
+//   req.session.admin = true;
+//   console.log(req.session);
+//   res.render("index", {nombre :nombre})
+// })
+app.post("/login", passport.authenticate("local",{
+  successRedirect:"/",
+  failureRedirect:"/login"
+}));
 
 app.get("/logout", (req,res) => {
   req.session.destroy(err => {
     if (err) {
         res.json({ status: 'Logout ERROR', body: err })
     } else {
-          res.render("index")
+          res.redirect("/")
       }
   })
-})
+});
 
 
 // PUERTO
