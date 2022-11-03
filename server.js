@@ -1,10 +1,11 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-// import session from "./middlewares/session.js";
 import passport from "passport";
 import sfs from "session-file-store";
 import session from "express-session";
-import PassportLocal from "passport-local"
+import PassportLocal from "passport-local";
+import cluster from "cluster";
+import os from "os";
 
 let LocalStrategy = PassportLocal.Strategy;
 const app = express();
@@ -87,7 +88,28 @@ app.get("/logout", (req,res) => {
 
 
 // PUERTO
-const PORT = process.env.port || 3001;
-app.listen(PORT, () => {
+// const PORT = process.env.port || 3001;
+// app.listen(PORT, () => {
+//   console.log(`Servidor escuchando por el puerto ${PORT}`);
+// });
+
+
+// CLUSTERS
+const numCPUs = os.cpus().length;
+
+if (cluster.isPrimary) {
+  console.log(`PID PRIMARIO ${process.pid}`);
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+  cluster.on("exit", (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} died`);
+    cluster.fork()
+  })
+} else {
+  const PORT = process.env.port || 3001;
+  app.listen(PORT, () => {
   console.log(`Servidor escuchando por el puerto ${PORT}`);
 });
+}
+
