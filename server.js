@@ -6,6 +6,10 @@ import session from "express-session";
 import PassportLocal from "passport-local";
 import cluster from "cluster";
 import os from "os";
+import compression from "compression";
+import log4js from "log4js";
+import autocannon from "autocannon";
+import { PassThrough } from "stream";
 
 let LocalStrategy = PassportLocal.Strategy;
 const app = express();
@@ -88,28 +92,82 @@ app.get("/logout", (req,res) => {
 
 
 // PUERTO
-// const PORT = process.env.port || 3001;
-// app.listen(PORT, () => {
-//   console.log(`Servidor escuchando por el puerto ${PORT}`);
-// });
+const PORT = process.env.port || 3001;
+app.listen(PORT, () => {
+  console.log(`Servidor escuchando por el puerto ${PORT}`);
+});
 
 
 // CLUSTERS
-const numCPUs = os.cpus().length;
+// const numCPUs = os.cpus().length;
 
-if (cluster.isPrimary) {
-  console.log(`PID PRIMARIO ${process.pid}`);
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
+// if (cluster.isPrimary) {
+//   console.log(`PID PRIMARIO ${process.pid}`);
+//   for (let i = 0; i < numCPUs; i++) {
+//     cluster.fork();
+//   }
+//   cluster.on("exit", (worker, code, signal) => {
+//     console.log(`Worker ${worker.process.pid} died`);
+//     cluster.fork()
+//   })
+// } else {
+//   const PORT = process.env.port || 3001;
+//   app.listen(PORT, () => {
+//   console.log(`Servidor escuchando por el puerto ${PORT}`);
+// });
+// }
+
+
+// COMPRESSION GZIP
+app.get("/info", (req,res) => {
+  const mensaje = "Sin gzip, "
+  res.send(mensaje.repeat(1000))
+})
+
+app.get("/infozip",compression(), (req,res) => {
+  const mensajeGzip = "Con gzip, "
+  res.send(mensajeGzip.repeat(1000))
+})
+
+// LOG4JS
+log4js.configure({
+  appenders: {
+    miLoggerConsole: {type: "console"},
+    miLoggerFile: {type: "file", filename: "info.log"},
+    miLoggerFile2: {type: "file", filename: "info2.log"}
+  },
+  categories:{
+    default: {appenders: ["miLoggerConsole"], level: "trace"},
+    consola: {appenders: ["miLoggerConsole"], level: "debug"},
+    archivo: {appenders: ["miLoggerFile"], level: "warn"},
+    archivo2: {appenders: ["miLoggerFile2"], level: "info"},
+    todos: {appenders: ["miLoggerConsole","miLoggerFile"], level: "error"},
   }
-  cluster.on("exit", (worker, code, signal) => {
-    console.log(`Worker ${worker.process.pid} died`);
-    cluster.fork()
+})
+
+const logger = log4js.getLogger();
+
+
+// AUTOCANNON
+function run(url){
+  const buf = [];
+  const outputStream = new PassThrough();
+
+  const inst = autocannon({
+    url,
+    connections: 100,
+    duration: 20
   })
-} else {
-  const PORT = process.env.port || 3001;
-  app.listen(PORT, () => {
-  console.log(`Servidor escuchando por el puerto ${PORT}`);
-});
+
+  autocannon.track(inst, { outputStream })
+
+  outputStream.on("data", data => buf.push(data))
+
+  inst.on("done", () => {
+    process.stdout.write(Buffer.concat(buf))
+  })
 }
 
+console.log("Running all benchmarks in parallel ...");
+
+run("http://localhost:3001/")
