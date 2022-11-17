@@ -147,6 +147,13 @@ log4js.configure({
 
 const logger = log4js.getLogger();
 
+logger.trace()
+logger.debug()
+logger.info()
+logger.warn()
+logger.error()
+logger.fatal()
+
 
 // AUTOCANNON
 function run(url){
