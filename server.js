@@ -130,51 +130,51 @@ app.get("/infozip",compression(), (req,res) => {
 })
 
 // LOG4JS
-log4js.configure({
-  appenders: {
-    miLoggerConsole: {type: "console"},
-    miLoggerFile: {type: "file", filename: "info.log"},
-    miLoggerFile2: {type: "file", filename: "info2.log"}
-  },
-  categories:{
-    default: {appenders: ["miLoggerConsole"], level: "trace"},
-    consola: {appenders: ["miLoggerConsole"], level: "debug"},
-    archivo: {appenders: ["miLoggerFile"], level: "warn"},
-    archivo2: {appenders: ["miLoggerFile2"], level: "info"},
-    todos: {appenders: ["miLoggerConsole","miLoggerFile"], level: "error"},
-  }
-})
+// log4js.configure({
+//   appenders: {
+//     miLoggerConsole: {type: "console"},
+//     miLoggerFile: {type: "file", filename: "info.log"},
+//     miLoggerFile2: {type: "file", filename: "info2.log"}
+//   },
+//   categories:{
+//     default: {appenders: ["miLoggerConsole"], level: "trace"},
+//     consola: {appenders: ["miLoggerConsole"], level: "debug"},
+//     archivo: {appenders: ["miLoggerFile"], level: "warn"},
+//     archivo2: {appenders: ["miLoggerFile2"], level: "info"},
+//     todos: {appenders: ["miLoggerConsole","miLoggerFile"], level: "error"},
+//   }
+// })
 
-const logger = log4js.getLogger();
+// const logger = log4js.getLogger();
 
-logger.trace()
-logger.debug()
-logger.info()
-logger.warn()
-logger.error()
-logger.fatal()
+// logger.trace()
+// logger.debug()
+// logger.info()
+// logger.warn()
+// logger.error()
+// logger.fatal()
 
 
 // AUTOCANNON
-function run(url){
-  const buf = [];
-  const outputStream = new PassThrough();
+// function run(url){
+//   const buf = [];
+//   const outputStream = new PassThrough();
 
-  const inst = autocannon({
-    url,
-    connections: 100,
-    duration: 20
-  })
+//   const inst = autocannon({
+//     url,
+//     connections: 100,
+//     duration: 20
+//   })
 
-  autocannon.track(inst, { outputStream })
+//   autocannon.track(inst, { outputStream })
 
-  outputStream.on("data", data => buf.push(data))
+//   outputStream.on("data", data => buf.push(data))
 
-  inst.on("done", () => {
-    process.stdout.write(Buffer.concat(buf))
-  })
-}
+//   inst.on("done", () => {
+//     process.stdout.write(Buffer.concat(buf))
+//   })
+// }
 
-console.log("Running all benchmarks in parallel ...");
+// console.log("Running all benchmarks in parallel ...");
 
-run("http://localhost:3001/")
+// run("http://localhost:3001/")
