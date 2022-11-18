@@ -52,19 +52,17 @@ passport.deserializeUser(function(id,done){
 });
 
 
-// app.get("/",(req,res,next)=>{
-//   if (req.isAuthenticated()){
-//     return next()
-//   } else {
-//     res.redirect("/login")
-//   }
-// }, (req,res) => {
-//     res.render("index")
-// })
-
-app.get("/", (req,res) => {
-  res.render("index")
+app.get("/",(req,res,next)=>{
+  if (req.isAuthenticated()){
+    return next()
+  } else {
+    res.redirect("/login")
+  }
+}, (req,res) => {
+    res.render("index")
 })
+
+
 
 app.get("/login", (req,res) => {
     res.render("login")
@@ -96,10 +94,8 @@ app.get("/logout", (req,res) => {
 
 
 // PUERTO
-const PORT = process.env.port || 3001;
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando por el puerto ${PORT}`);
-});
+let port = process.env.PORT || 8080;
+app.listen(port);
 
 
 // CLUSTERS
