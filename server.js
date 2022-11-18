@@ -52,14 +52,18 @@ passport.deserializeUser(function(id,done){
 });
 
 
-app.get("/",(req,res,next)=>{
-  if (req.isAuthenticated()){
-    return next()
-  } else {
-    res.redirect("/login")
-  }
-}, (req,res) => {
-    res.render("index")
+// app.get("/",(req,res,next)=>{
+//   if (req.isAuthenticated()){
+//     return next()
+//   } else {
+//     res.redirect("/login")
+//   }
+// }, (req,res) => {
+//     res.render("index")
+// })
+
+app.get("/", (req,res) => {
+  res.render("index")
 })
 
 app.get("/login", (req,res) => {
