@@ -1,0 +1,11 @@
+html 
+    head 
+        title Registrarme
+        link(rel="stylesheet", href="login.css")
+    body 
+        div.formulario
+            form(action="/register", method="post") 
+                h2 Registrarme
+                input(type="email" placeholder="Email" id="email" name="email" required)
+                input(type="password" placeholder="Contraseña" id="contraseña" name="password" required)
+                input(type="submit", value="Register" id="login" href="/login")

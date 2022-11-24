@@ -10,6 +10,11 @@ import compression from "compression";
 import log4js from "log4js";
 import autocannon from "autocannon";
 import { PassThrough } from "stream";
+import bcrypt from "bcrypt"
+import mongoose from "mongoose"
+// import {User} from "./user.js"
+import bodyParser from "body-parser"
+
 
 let LocalStrategy = PassportLocal.Strategy;
 const app = express();
@@ -28,6 +33,7 @@ app.use(session({
   }));
 
 app.use(express.urlencoded({extended:true}))
+app.use(bodyParser.json())
 app.use(express.static("./views"));
 app.use(express.static("./styles"));
 
@@ -51,23 +57,74 @@ passport.deserializeUser(function(id,done){
   done(null,{id:1, nombre:"juan"})
 });
 
+// MONGO
+const mongo_url = "mongodb://localhost:27017";
+
+mongoose.connect(mongo_url, function(err){
+  if (err) {
+    throw err
+  } else {
+    console.log(`Connexión a ${mongo_url} exitosa`);
+  }
+})
+
 
 app.get("/",(req,res,next)=>{
   if (req.isAuthenticated()){
     return next()
   } else {
-    res.redirect("/login")
+    res.redirect("/register")
   }
 }, (req,res) => {
     res.render("index")
 })
 
 
-
-app.get("/login", (req,res) => {
-    res.render("login")
+app.get("/register", (req,res) => {
+  res.render("register")
 })
 
+app.post("/register", (req,res) => {
+  res.render("login")
+})
+
+// app.post("/register", (req,res) => {
+//   const {email, password} = req.body;
+//   const user = new User({email, password});
+//   user.save(err =>{
+//     if (err) {
+//       res.status(500).send("ERROR AL REGISTRAR EL USUARIO")
+//     } else {
+//       res.status(200).send("USUARIO REGISTRADO")
+//     }
+//   })
+// })
+
+
+app.get("/login", (req,res) => {
+  res.render("login")
+})
+
+// app.post("/login", (req,res) => {
+//   const {email, password} = req.body;
+//   User.findOne({email}, (err, user) => {
+//     if (err) {
+//       res.status(500).send("ERROR AL AUTENTICAR EL USUARIO")
+//     } else if(!user){
+//       res.status(500).send("EL USUARIO NO EXISTE")
+//     } else {
+//       user.isCorrectPassword(password, (err, result) => {
+//         if (err) {
+//           res.status(500).send("ERROR AL AUTENTICAR EL USUARIO")
+//         } else if(result){
+//           res.status(200).send("USUARIO AUTENTICADO CORRECTAMENTE")
+//         } else {
+//           res.status(500).send("USUARIO Y/O CONTRASEÑA INCORRECTA")
+//         }
+//       })
+//     }
+//   }) 
+// })
 
 // SESSION
 // app.post("/login", (req,res) => {
@@ -119,15 +176,15 @@ app.listen(port);
 
 
 // COMPRESSION GZIP
-app.get("/info", (req,res) => {
-  const mensaje = "Sin gzip, "
-  res.send(mensaje.repeat(1000))
-})
+// app.get("/info", (req,res) => {
+//   const mensaje = "Sin gzip, "
+//   res.send(mensaje.repeat(1000))
+// })
 
-app.get("/infozip",compression(), (req,res) => {
-  const mensajeGzip = "Con gzip, "
-  res.send(mensajeGzip.repeat(1000))
-})
+// app.get("/infozip",compression(), (req,res) => {
+//   const mensajeGzip = "Con gzip, "
+//   res.send(mensajeGzip.repeat(1000))
+// })
 
 // LOG4JS
 // log4js.configure({
@@ -178,3 +235,4 @@ app.get("/infozip",compression(), (req,res) => {
 // console.log("Running all benchmarks in parallel ...");
 
 // run("http://localhost:3001/")
+
