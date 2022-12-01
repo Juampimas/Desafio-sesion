@@ -1,0 +1,12 @@
+html 
+    head 
+        title Carrito
+        link(rel="stylesheet", href="style.css")
+    body 
+        -function nombreNuevo(nombre){if(nombre==undefined){return ""}else {return nombre}} 
+        div.banner
+            h1(id="titulo")= `Carrito`
+            div
+                a(href="/logout") Log Out        
+                a(href="/carrito") Carrito   
+        button Enviar mail

@@ -3,12 +3,17 @@ html
         title Inicio de sesión
         link(rel="stylesheet", href="style.css")
     body 
+        -let productos = [{id: 1,nombre: "LG Ultra HD Smart TV 50",descripcion: "TV",precio: 120,foto: "https://www.lg.com/ar/images/televisores/md06198536/gallery/DES_1_N.jpg",stock: 100},{id: 2,nombre: "UHD 4K Smart TV AU7000",descripcion: "TV",precio: 580,foto: "https://images.samsung.com/is/image/samsung/p6pim/ar/un43au7000gczb/gallery/ar-uhd-au7000-un43au7000gczb-489502319?$1300_1038_PNG$",stock: 100},{id: 3,nombre: "Full HD Smart TV T5300",descripcion: "TV",precio: 900,foto: "https://images.samsung.com/is/image/samsung/p6pim/ar/un43t5300agczb/gallery/ar-fhd-t5300-un43t5300agczb-356627272?$1300_1038_PNG$",stock: 100},{id: 4,nombre: "Smart TV LED 4K UHD",descripcion: "TV",precio: 1280,foto: "https://images.philips.com/is/image/PhilipsConsumer/58PUD6654_77-IMS-es_AR?wid=420&hei=360&$jpglarge$",stock: 100},{id: 5,nombre: "Monitor LED 27",descripcion: "Computadora",precio: 1700,foto: "https://samsungar.vtexassets.com/arquivos/ids/169885-1200-auto?width=1200&height=auto&aspect=true",stock: 100},{id: 6,nombre: "Monitor de computadora SAMSUNG serie CJ890 de 49p",descripcion: "Computadora",precio: 2300,foto: "https://m.media-amazon.com/images/I/61Hh-0F7AbL._AC_SL1000_.jpg",stock: 100},{id: 7,nombre: "Notebook Samsung Galaxy Book Go 4",descripcion: "Computadora",precio: 2860,foto: "https://http2.mlstatic.com/D_NQ_NP_859420-MLA51583009306_092022-O.webp",stock: 100},{id: 8,nombre: "Monitor Gaming Odyssey",descripcion: "Computadora",precio: 3350,foto: "https://samsungar.vtexassets.com/arquivos/ids/181932-1200-auto?width=1200&height=auto&aspect=true",stock: 100},{id: 9,nombre: "CELULAR SAMSUNG A53",descripcion: "Celular",precio: 4320,foto: "https://medias.musimundo.com/medias/00531039-145897-145897-01-145897-01.jpg-size515?context=bWFzdGVyfGltYWdlc3w4NzM5NnxpbWFnZS9qcGVnfGgzNS9oYzUvMTAzODQxNDEwOTA4NDYvMDA1MzEwMzktMTQ1ODk3LTE0NTg5N18wMS0xNDU4OTdfMDEuanBnX3NpemU1MTV8OWEwMGU4Y2IxZjg0ZDdlMDcwZjYyOTJjM2M0MzhiYjA0MmVjOGYzNzZjMDQ2MmI1MzE5NjI0MmI5OTUwMTE5Zg",stock: 100},{id: 10,nombre: "Samsung Galaxy S22 Ultra",descripcion: "Celular",precio: 4990,foto: "https://http2.mlstatic.com/D_NQ_NP_668050-MLA49303776893_032022-O.webp",stock: 100}]
         -function nombreNuevo(nombre){if(nombre==undefined){return ""}else {return nombre}} 
         div.banner
             h1(id="titulo")= `Bienvenido `+ nombreNuevo(nombre)
             div
-                a(href="/login") Log In 
-                a(href="/logout") Log Out
-
-    
-        
+                a(href="/logout") Log Out        
+                a(href="/carrito") Carrito
+        ul  
+            each n in productos
+                li 
+                    h3= n.nombre   
+                    p= `Precio: $${n.precio }`  
+                    img(src= n.foto, style="width: 300px")  
+                    button Enviar al carrito      

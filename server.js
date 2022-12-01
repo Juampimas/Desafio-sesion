@@ -12,14 +12,16 @@ import autocannon from "autocannon";
 import { PassThrough } from "stream";
 import bcrypt from "bcrypt"
 import mongoose from "mongoose"
-// import {User} from "./user.js"
-import bodyParser from "body-parser"
+import {createTransport} from "nodemailer"
+
+
 
 
 let LocalStrategy = PassportLocal.Strategy;
 const app = express();
 const FileStore = sfs(session);
 const store = new FileStore({ path: "./sesiones", ttl: 300, retries:0 })
+
 
 
 app.set("views", "./views");
@@ -33,7 +35,7 @@ app.use(session({
   }));
 
 app.use(express.urlencoded({extended:true}))
-app.use(bodyParser.json())
+app.use(express.json())
 app.use(express.static("./views"));
 app.use(express.static("./styles"));
 
@@ -58,7 +60,7 @@ passport.deserializeUser(function(id,done){
 });
 
 // MONGO
-const mongo_url = "mongodb://localhost:27017";
+const mongo_url = "mongodb://localhost:27017/personas";
 
 mongoose.connect(mongo_url, function(err){
   if (err) {
@@ -67,6 +69,13 @@ mongoose.connect(mongo_url, function(err){
     console.log(`Connexión a ${mongo_url} exitosa`);
   }
 })
+
+const userSchema = new mongoose.Schema({
+    email: {type: String, required: true, unique:true},
+    password: {type: String, required: true}
+});
+
+const dbUser = mongoose.model(`users`, userSchema)
 
 
 app.get("/",(req,res,next)=>{
@@ -79,52 +88,94 @@ app.get("/",(req,res,next)=>{
     res.render("index")
 })
 
-
 app.get("/register", (req,res) => {
   res.render("register")
 })
 
-app.post("/register", (req,res) => {
-  res.render("login")
-})
-
 // app.post("/register", (req,res) => {
-//   const {email, password} = req.body;
-//   const user = new User({email, password});
-//   user.save(err =>{
-//     if (err) {
-//       res.status(500).send("ERROR AL REGISTRAR EL USUARIO")
-//     } else {
-//       res.status(200).send("USUARIO REGISTRADO")
-//     }
-//   })
+//   const user = userSchema(req.body);
+//   user  
+//     .save()
+//     .then((data) => res.json(data))
+//     .catch((error) => res.json({message: error}))
+//   res.render("login")
 // })
 
+app.post("/register", (req,res) => {
+  res.redirect("login")
+  const {email, password} = req.body;
+  const newUser = dbUser.create({email:email, password:password})
+  // const newUser = new dbUser({email:email, password:password});
+  // newUser.save();
+  console.log(newUser);
+  
+})
+
+function findUserEmail(email){
+  if (dbUser.find(email)) {
+    return true
+  } else {
+    return false
+  }
+}
+function findUserPassword(password){
+  if (dbUser.find(password)) {
+    return true
+  } else {
+    return false
+  }
+}
 
 app.get("/login", (req,res) => {
   res.render("login")
 })
 
-// app.post("/login", (req,res) => {
-//   const {email, password} = req.body;
-//   User.findOne({email}, (err, user) => {
-//     if (err) {
-//       res.status(500).send("ERROR AL AUTENTICAR EL USUARIO")
-//     } else if(!user){
-//       res.status(500).send("EL USUARIO NO EXISTE")
+// const saltRounds = 10;
+
+// userSchema.pre("save", function(next){
+//     if(this.isNew || this.isModified("password")){
+//         document = this;
+
+//         bcrypt.hash(document.password, saltRounds, (err, hashedPassword) => {
+//             if (err) {
+//                 next(err);
+//             } else {
+//                 document.password = hashedPassword;
+//                 next();
+//             }
+//         });
 //     } else {
-//       user.isCorrectPassword(password, (err, result) => {
-//         if (err) {
-//           res.status(500).send("ERROR AL AUTENTICAR EL USUARIO")
-//         } else if(result){
-//           res.status(200).send("USUARIO AUTENTICADO CORRECTAMENTE")
-//         } else {
-//           res.status(500).send("USUARIO Y/O CONTRASEÑA INCORRECTA")
-//         }
-//       })
+//         next();
 //     }
-//   }) 
 // })
+
+// userSchema.methods.isCorrectPassword = function(candidatePassword, callback){
+//     bcrypt.compare(candidatePassword, this.password, function(err, same){
+//         if (err) {
+//             callback(err)
+//         } else {
+//             callback(err, same)
+//         }
+//     })
+// }
+
+app.post("/login", (req,res) => {
+  const {email, password} = req.body;
+  dbUser.findOne({email,password}, (err, user) => {
+        if (err) {
+          res.status(500).send("ERROR AL AUTENTICAR EL USUARIO")
+        } else if(!user){
+          res.status(500).send("EL USUARIO NO EXISTE")
+        } else {
+          res.render("index")
+        }
+      }) 
+})
+ 
+
+app.get("/carrito", (req,res) => {
+  res.render("carrito")
+})
 
 // SESSION
 // app.post("/login", (req,res) => {
@@ -153,6 +204,33 @@ app.get("/logout", (req,res) => {
 // PUERTO
 let port = process.env.PORT || 8080;
 app.listen(port);
+
+
+// NODEMAILER
+const transport = createTransport({
+  host: 'smtp.ethereal.email',
+  port: 587,
+  auth: {
+      user: 'pansy34@ethereal.email',
+      pass: 'qsP2fGBMBr1jx3vS6g'
+  }
+});
+
+const mailOptions = {
+  from:"Servidor Node js",
+  to: 'juampim98@gmail.com',
+  subject:"Email de prueba",
+  html: "<h1>Mail de prueba</h1>"
+}
+
+try {
+  const info = await transport.sendMail(mailOptions)
+  console.log(info);
+} catch (error) {
+  console.log(error);
+}
+
+
 
 
 // CLUSTERS
@@ -235,4 +313,9 @@ app.listen(port);
 // console.log("Running all benchmarks in parallel ...");
 
 // run("http://localhost:3001/")
+
+
+
+
+
 
